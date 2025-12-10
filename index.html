@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiRTP - Random Teleport Plugin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=VT323&display=swap" rel="stylesheet">
+    <!-- Removed external icon script to prevent loading errors -->
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        :root {
+            --mc-bg: #111111;
+            --mc-surface: #1e1e1e;
+            --mc-border: #444444;
+            --mc-accent: #55FF55; /* Minecraft Green */
+            --mc-secondary: #AAAAAA;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--mc-bg);
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            transition: background-color 0.5s ease;
+        }
+
+        /* The Classic Minecraft Font */
+        .pixel-font {
+            font-family: 'VT323', monospace;
+            text-transform: uppercase;
+        }
+
+        /* Boxy Minecraft Buttons */
+        .mc-btn {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 12px 24px;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            color: #fff;
+            background: #333;
+            border: 4px solid #000;
+            box-shadow: inset 4px 4px 0 rgba(255,255,255,0.2), inset -4px -4px 0 rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.1s, filter 0.2s;
+            text-decoration: none;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .mc-btn:hover {
+            filter: brightness(1.1);
+            transform: translateY(-2px);
+        }
+
+        .mc-btn:active {
+            transform: translateY(2px);
+            box-shadow: inset 4px 4px 0 rgba(0,0,0,0.4), inset -4px -4px 0 rgba(255,255,255,0.2);
+        }
+
+        .mc-btn-primary {
+            background: var(--mc-accent);
+            color: #000;
+            text-shadow: none;
+            border-color: #004400;
+        }
+
+        .mc-btn.active {
+            background: #555;
+            box-shadow: inset 4px 4px 0 rgba(0,0,0,0.4), inset -4px -4px 0 rgba(255,255,255,0.2);
+            color: var(--mc-accent);
+        }
+
+        /* Minecraft Panel Style */
+        .mc-card {
+            background-color: rgba(30, 30, 30, 0.9);
+            border: 2px solid #555;
+            box-shadow: 8px 8px 0 #000;
+            transition: transform 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mc-card:hover {
+            transform: translate(-4px, -4px);
+            box-shadow: 12px 12px 0 #000;
+            border-color: var(--mc-accent);
+        }
+
+        /* Ender Pearl Style */
+        .ender-pearl {
+            background: radial-gradient(circle at 35% 35%, #66ffcc, #008866 40%, #001111 90%);
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+            border: 4px solid #002211;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+        
+        /* Pearl Highlight */
+        .ender-pearl::after {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 15%;
+            width: 25%;
+            height: 25%;
+            background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.9), rgba(255,255,255,0));
+            border-radius: 50%;
+            filter: blur(2px);
+        }
+
+        /* Scanline Effect */
+        .scanlines {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(to bottom, rgba(255,255,255,0), rgba(255,255,255,0) 50%, rgba(0,0,0,0.1) 50%, rgba(0,0,0,0.1));
+            background-size: 100% 4px;
+            pointer-events: none;
+            z-index: 50;
+            opacity: 0.3;
+        }
+
+        /* Code Block */
+        .code-snippet {
+            font-family: 'Consolas', 'Monaco', monospace;
+            background: #0d0d0d;
+            border: 2px solid #333;
+            color: #aaa;
+            padding: 1.5rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            white-space: pre;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+        .code-key { color: #ff5555; }
+        .code-val { color: #55ff55; }
+        .code-str { color: #55ffff; }
+        .code-comment { color: #666; font-style: italic; }
+
+        /* Floating Animation for Orb */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        .animate-float {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        /* Particle Container */
+        #particles {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: var(--mc-accent);
+            opacity: 0;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <div class="scanlines"></div>
+    <div id="particles"></div>
+
+    <!-- Nav -->
+    <nav class="w-full p-6 flex flex-col md:flex-row justify-between items-center z-20 bg-black/50 backdrop-blur-sm border-b-2 border-white/10 sticky top-0">
+        <div class="text-4xl pixel-font tracking-widest text-white mb-4 md:mb-0">
+            <span class="text-[var(--mc-accent)]">&lt;</span>MiRTP<span class="text-[var(--mc-accent)]">/&gt;</span>
+        </div>
+        <div class="flex gap-4">
+            <a href="#features" class="mc-btn text-lg py-2 px-4 bg-gray-700">FEATURES</a>
+            <a href="#config" class="mc-btn text-lg py-2 px-4 bg-gray-700">CONFIG</a>
+            <a href="https://modrinth.com/plugin/mirtp" target="_blank" class="mc-btn mc-btn-primary text-lg py-2 px-4">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                GET PLUGIN
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <main class="flex-grow flex flex-col items-center justify-center text-center px-4 py-20 relative z-10">
+        
+        <!-- Functional Ender Pearl -->
+        <div class="relative group cursor-pointer mb-12 animate-float" onclick="triggerTeleport()">
+            <div id="orb-glow" class="absolute inset-0 bg-emerald-500 rounded-full blur-[60px] opacity-20 group-hover:opacity-50 transition-opacity duration-500"></div>
+            
+            <div id="orb-body" class="w-32 h-32 rounded-full ender-pearl flex items-center justify-center relative z-10 transition-transform duration-200 group-hover:scale-105 group-active:scale-95">
+                <!-- Icon inside pearl -->
+                <div id="orb-icon-container" class="text-white/50 relative z-20 mix-blend-overlay">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                </div>
+            </div>
+        </div>
+
+        <h1 class="text-6xl md:text-8xl pixel-font mb-4 leading-none">
+            RANDOM <span class="text-[var(--mc-accent)]" id="hero-title">TELEPORT</span>
+        </h1>
+        
+        <p class="text-xl md:text-2xl text-gray-400 max-w-2xl mb-8 pixel-font tracking-wide">
+            The safe, modern, and lightweight RTP solution.<br>
+            <span class="text-white">Now with Editable GUI & Custom Messages (v1.1)</span>
+        </p>
+
+        <!-- Compatibility Badge -->
+        <div class="mb-10 inline-flex items-center gap-4 bg-gray-900 border-2 border-gray-700 px-6 py-2 rounded-none">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--mc-accent)]"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
+                <span class="text-gray-300 font-bold tracking-wide">PAPER</span>
+            </div>
+            <div class="h-6 w-px bg-gray-600"></div>
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--mc-accent)]"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/><line x1="9" x2="9" y1="1" y2="4"/><line x1="15" x2="15" y1="1" y2="4"/><line x1="9" x2="9" y1="20" y2="23"/><line x1="15" x2="15" y1="20" y2="23"/><line x1="20" x2="23" y1="9" y2="9"/><line x1="20" x2="23" y1="14" y2="14"/><line x1="1" x2="4" y1="9" y2="9"/><line x1="1" x2="4" y1="14" y2="14"/></svg>
+                <span class="text-gray-300 font-bold tracking-wide">1.21.10</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-6">
+            <a href="https://modrinth.com/plugin/mirtp" target="_blank" class="mc-btn mc-btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
+                DOWNLOAD v1.1
+            </a>
+            <a href="#config" class="mc-btn bg-gray-800">
+                VIEW CONFIG
+            </a>
+        </div>
+
+    </main>
+
+    <!-- Features -->
+    <section id="features" class="py-20 px-4 bg-black/20">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-5xl pixel-font text-center mb-16 text-white"><span class="border-b-4 border-[var(--mc-accent)]">FEATURES</span></h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="mc-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 bg-gray-800 border-4 border-black flex items-center justify-center mb-6 group-hover:border-[var(--mc-accent)] transition-colors relative overflow-hidden">
+                        <!-- Background Pattern inside Icon Box -->
+                        <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--mc-accent)] relative z-10"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    </div>
+                    <h3 class="text-3xl pixel-font mb-3 text-[var(--mc-accent)] flex items-center justify-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        SMART SAFETY
+                    </h3>
+                    <p class="text-gray-400">Scans terrain to prevent lava, water, and void landings. Keeps players safe automatically.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="mc-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 bg-gray-800 border-4 border-black flex items-center justify-center mb-6 group-hover:border-blue-400 transition-colors relative overflow-hidden">
+                         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-400 relative z-10"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                    </div>
+                    <h3 class="text-3xl pixel-font mb-3 text-blue-400 flex items-center justify-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" x2="21" y1="9" y2="9"/><line x1="9" x2="9" y1="21" y2="9"/></svg>
+                        CUSTOM GUI
+                    </h3>
+                    <p class="text-gray-400">Fully editable inventory menu. Configure item names, lore, and materials in <code class="text-white">config.yml</code>.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="mc-card p-8 flex flex-col items-center text-center group">
+                    <div class="w-20 h-20 bg-gray-800 border-4 border-black flex items-center justify-center mb-6 group-hover:border-purple-400 transition-colors relative overflow-hidden">
+                         <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]"></div>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-400 relative z-10"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                    </div>
+                    <h3 class="text-3xl pixel-font mb-3 text-purple-400 flex items-center justify-center gap-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+                        MESSAGES
+                    </h3>
+                    <p class="text-gray-400">Customizable chat messages. Supports <span class="text-purple-400">&</span> color codes and placeholders.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Config Section -->
+    <section id="config" class="py-20 px-4">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-5xl pixel-font text-center mb-10 text-white">CONFIGURATION</h2>
+            
+            <!-- Tabs -->
+            <div class="flex justify-center gap-4 mb-4">
+                <button onclick="showTab('config')" id="tab-config" class="mc-btn mc-btn-primary active text-lg">config.yml</button>
+                <button onclick="showTab('messages')" id="tab-messages" class="mc-btn bg-gray-700 text-lg">messages.yml</button>
+            </div>
+
+            <div class="mc-card p-2 bg-black relative">
+                <!-- Mac-style dots for aesthetic -->
+                <div class="flex items-center gap-2 px-4 py-3 border-b border-gray-800 mb-2 bg-[#1a1a1a]">
+                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                    <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span id="filename-display" class="ml-4 text-gray-500 pixel-font text-lg tracking-wide">config.yml</span>
+                </div>
+
+                <!-- Config.yml Content -->
+                <div id="code-config" class="code-snippet">
+<span class="code-key">settings:</span>
+  <span class="code-comment"># The maximum distance from 0,0 players can go</span>
+  <span class="code-key">max-radius:</span> <span class="code-val">5000</span>
+
+  <span class="code-comment"># The minimum distance from 0,0 (default 500)</span>
+  <span class="code-key">min-radius:</span> <span class="code-val">500</span>
+
+<span class="code-key">gui:</span>
+  <span class="code-key">title:</span> <span class="code-str">"&8» &0Random Teleport &8«"</span>
+  <span class="code-key">filler:</span> <span class="code-str">"GRAY_STAINED_GLASS_PANE"</span>
+  <span class="code-key">items:</span>
+    <span class="code-key">overworld:</span>
+      <span class="code-key">material:</span> <span class="code-str">"GRASS_BLOCK"</span>
+      <span class="code-key">name:</span> <span class="code-str">"&aOverworld"</span>
+      <span class="code-key">lore:</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&7Click to find a random"</span>
+        <span class="code-str">- "&7spot in the &fOverworld&7."</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&a► Click to Warp"</span>
+    <span class="code-key">nether:</span>
+      <span class="code-key">material:</span> <span class="code-str">"NETHERRACK"</span>
+      <span class="code-key">name:</span> <span class="code-str">"&cThe Nether"</span>
+      <span class="code-key">lore:</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&7Click to find a random"</span>
+        <span class="code-str">- "&7spot in the &fNether&7."</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&c► Click to Warp"</span>
+    <span class="code-key">end:</span>
+      <span class="code-key">material:</span> <span class="code-str">"END_STONE"</span>
+      <span class="code-key">name:</span> <span class="code-str">"&dThe End"</span>
+      <span class="code-key">lore:</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&7Click to find a random"</span>
+        <span class="code-str">- "&7spot in the &fEnd&7."</span>
+        <span class="code-str">- "&8&m------------------"</span>
+        <span class="code-str">- "&d► Click to Warp"</span>
+</div>
+
+                <!-- Messages.yml Content -->
+                <div id="code-messages" class="code-snippet hidden" style="display: none;">
+<span class="code-comment"># Messages for MiRTP</span>
+<span class="code-comment"># You can use color codes with '&'</span>
+
+<span class="code-key">command:</span>
+  <span class="code-key">reload:</span> <span class="code-str">"&aMiRTP configuration reloaded."</span>
+  <span class="code-key">no-permission:</span> <span class="code-str">"&cYou do not have permission to use this command."</span>
+
+<span class="code-key">teleport:</span>
+  <span class="code-key">searching:</span> <span class="code-str">"&7Searching for safe location..."</span>
+  <span class="code-key">success:</span>
+    <span class="code-str">- " "</span>
+    <span class="code-str">- "&aTeleportation Successful!"</span>
+    <span class="code-str">- " "</span>
+  <span class="code-key">fail:</span> <span class="code-str">"&c✘ Could not find a safe spot. Try again."</span>
+  <span class="code-key">world-not-found:</span> <span class="code-str">"&cError: World not found."</span>
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 text-center border-t border-gray-800 bg-black">
+        <p class="text-gray-500 pixel-font text-xl">Created by <span class="text-white">degradawans</span></p>
+        <p class="text-gray-700 text-sm mt-2">NOT AN OFFICIAL MINECRAFT PRODUCT</p>
+    </footer>
+
+    <script>
+        // --- Config Tabs Logic ---
+        function showTab(tabName) {
+            const configBlock = document.getElementById('code-config');
+            const messagesBlock = document.getElementById('code-messages');
+            const tabConfig = document.getElementById('tab-config');
+            const tabMessages = document.getElementById('tab-messages');
+            const filenameDisplay = document.getElementById('filename-display');
+
+            if (tabName === 'config') {
+                configBlock.style.display = 'block';
+                messagesBlock.style.display = 'none';
+                tabConfig.classList.add('active', 'mc-btn-primary');
+                tabConfig.classList.remove('bg-gray-700');
+                tabMessages.classList.remove('active', 'mc-btn-primary');
+                tabMessages.classList.add('bg-gray-700');
+                filenameDisplay.innerText = 'config.yml';
+            } else {
+                configBlock.style.display = 'none';
+                messagesBlock.style.display = 'block';
+                tabMessages.classList.add('active', 'mc-btn-primary');
+                tabMessages.classList.remove('bg-gray-700');
+                tabConfig.classList.remove('active', 'mc-btn-primary');
+                tabConfig.classList.add('bg-gray-700');
+                filenameDisplay.innerText = 'messages.yml';
+            }
+        }
+
+        // --- Teleport / Theme Logic ---
+        // Store SVG paths for icons to swap them manually without external libraries
+        const icons = {
+            zap: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+            flame: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.115.385-2.256 1-3.5a2.5 2.5 0 0 1 2.5 3.5z"></path></svg>',
+            eye: '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+        };
+
+        const worlds = [
+            { 
+                id: 'overworld', 
+                color: '#55FF55', 
+                bg: '#111111', 
+                icon: 'zap',
+                pearl: 'radial-gradient(circle at 35% 35%, #66ffcc, #008866 40%, #001111 90%)'
+            },
+            { 
+                id: 'nether', 
+                color: '#FF5555', 
+                bg: '#220505', 
+                icon: 'flame',
+                pearl: 'radial-gradient(circle at 35% 35%, #ffccaa, #aa3300 40%, #220000 90%)'
+            },
+            { 
+                id: 'end', 
+                color: '#d255ff', 
+                bg: '#110515', 
+                icon: 'eye',
+                pearl: 'radial-gradient(circle at 35% 35%, #eebbff, #8800aa 40%, #110022 90%)'
+            }
+        ];
+
+        let currentWorldIndex = 0;
+
+        function triggerTeleport() {
+            // 1. Shake Effect
+            const main = document.querySelector('main');
+            main.style.transform = "translate(5px, 5px)";
+            setTimeout(() => main.style.transform = "translate(-5px, -5px)", 50);
+            setTimeout(() => main.style.transform = "translate(5px, -5px)", 100);
+            setTimeout(() => main.style.transform = "translate(0, 0)", 150);
+
+            // 2. Switch World
+            currentWorldIndex = (currentWorldIndex + 1) % worlds.length;
+            const world = worlds[currentWorldIndex];
+
+            // 3. Apply Colors
+            document.documentElement.style.setProperty('--mc-accent', world.color);
+            document.documentElement.style.setProperty('--mc-bg', world.bg);
+            document.body.style.backgroundColor = world.bg;
+
+            // 4. Update Pearl Appearance
+            const pearl = document.querySelector('.ender-pearl');
+            pearl.style.background = world.pearl;
+            const glow = document.getElementById('orb-glow');
+            glow.style.backgroundColor = world.color;
+
+            // 5. Update Orb Icon using innerHTML swap
+            const iconContainer = document.getElementById('orb-icon-container');
+            iconContainer.innerHTML = icons[world.icon];
+
+            // 6. Spawn Particles
+            spawnParticles(world.color);
+        }
+
+        function spawnParticles(color) {
+            const container = document.getElementById('particles');
+            for(let i=0; i<30; i++) {
+                const p = document.createElement('div');
+                p.classList.add('particle');
+                p.style.backgroundColor = color;
+                p.style.left = Math.random() * 100 + 'vw';
+                p.style.top = Math.random() * 100 + 'vh';
+                
+                container.appendChild(p);
+
+                // Animate
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200;
+                
+                requestAnimationFrame(() => {
+                    p.style.transition = 'all 1s ease-out';
+                    p.style.opacity = '1';
+                    p.style.transform = `translate(${tx}px, ${ty}px) scale(0)`;
+                });
+
+                // Cleanup
+                setTimeout(() => p.remove(), 1000);
+            }
+        }
+    </script>
+</body>
+</html>
