@@ -216,10 +216,10 @@
         
         <p class="text-xl md:text-2xl text-gray-400 max-w-2xl mb-8 pixel-font tracking-wide">
             The safe, modern, and lightweight RTP solution.<br>
-            <span class="text-white">Now with Editable GUI & Custom Messages (v1.1)</span>
+            <span class="text-white">Now with Async RTP, Cooldowns & Countdowns (v1.1.1)</span>
         </p>
 
-        <!-- Compatibility Badge (UPDATED) -->
+        <!-- Compatibility Badge -->
         <div class="mb-10 inline-flex flex-wrap justify-center items-center gap-4 bg-gray-900 border-2 border-gray-700 px-6 py-2 rounded-none">
             <div class="flex items-center gap-2">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-[var(--mc-accent)]"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" x2="12" y1="22.08" y2="12"/></svg>
@@ -235,7 +235,7 @@
         <div class="flex flex-col md:flex-row gap-6">
             <a href="https://modrinth.com/plugin/mirtp" target="_blank" class="mc-btn mc-btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                DOWNLOAD v1.1
+                DOWNLOAD v1.1.1
             </a>
             <a href="#config" class="mc-btn bg-gray-800">
                 VIEW CONFIG
@@ -316,11 +316,23 @@
                 <!-- Config.yml Content -->
                 <div id="code-config" class="code-snippet">
 <span class="code-key">settings:</span>
-  <span class="code-comment"># The maximum distance from 0,0 players can go</span>
+  <span class="code-comment"># The maximum distance from 0,0 players can go (e.g., 5000 blocks)</span>
   <span class="code-key">max-radius:</span> <span class="code-val">5000</span>
 
-  <span class="code-comment"># The minimum distance from 0,0 (default 500)</span>
+  <span class="code-comment"># The minimum distance from 0,0 (500 is by default to avoid teleporting to spawn)</span>
   <span class="code-key">min-radius:</span> <span class="code-val">500</span>
+
+<span class="code-key">cooldown:</span>
+  <span class="code-key">enabled:</span> <span class="code-val">true</span>
+  <span class="code-comment"># Cooldown in seconds before a player can use the RTP command again</span>
+  <span class="code-key">time:</span> <span class="code-val">30</span>
+
+<span class="code-key">countdown:</span>
+  <span class="code-key">enabled:</span> <span class="code-val">true</span>
+  <span class="code-comment"># Countdown in seconds before the player is teleported</span>
+  <span class="code-key">time:</span> <span class="code-val">5</span>
+  <span class="code-comment"># Title message shown during the countdown. Use {time} as a placeholder.</span>
+  <span class="code-key">title:</span> <span class="code-str">"&aTeleporting in &e{time}..."</span>
 
 <span class="code-key">gui:</span>
   <span class="code-key">title:</span> <span class="code-str">"&8» &0Random Teleport &8«"</span>
@@ -359,6 +371,11 @@
                 <div id="code-messages" class="code-snippet hidden" style="display: none;">
 <span class="code-comment"># Messages for MiRTP</span>
 <span class="code-comment"># You can use color codes with '&'</span>
+<span class="code-comment">#</span>
+<span class="code-comment"># Placeholder:</span>
+<span class="code-comment"># {x}, {y}, {z} - coordinates</span>
+<span class="code-comment"># {world} - world name</span>
+<span class="code-comment"># {time} - remaining time</span>
 
 <span class="code-key">command:</span>
   <span class="code-key">reload:</span> <span class="code-str">"&aMiRTP configuration reloaded."</span>
@@ -368,10 +385,18 @@
   <span class="code-key">searching:</span> <span class="code-str">"&7Searching for safe location..."</span>
   <span class="code-key">success:</span>
     <span class="code-str">- " "</span>
-    <span class="code-str">- "&aTeleportation Successful!"</span>
+    <span class="code-str">- "&8&m--------------------------------"</span>
+    <span class="code-str">- "&a&l✔ Teleport Successful"</span>
+    <span class="code-str">- " "</span>
+    <span class="code-str">- "  &7Location: &f{x}, {y}, {z}"</span>
+    <span class="code-str">- "  &7World: &f{world}"</span>
+    <span class="code-str">- "&8&m--------------------------------"</span>
     <span class="code-str">- " "</span>
   <span class="code-key">fail:</span> <span class="code-str">"&c✘ Could not find a safe spot. Try again."</span>
   <span class="code-key">world-not-found:</span> <span class="code-str">"&cError: World not found."</span>
+  <span class="code-key">cooldown:</span> <span class="code-str">"&cYou must wait {time} seconds before teleporting again."</span>
+  <span class="code-key">countdown-start:</span> <span class="code-str">"&aTeleportation will begin in {time} seconds. Don't move!"</span>
+  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"&cTeleportation cancelled because you moved."</span>
 </div>
             </div>
         </div>
