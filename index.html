@@ -216,7 +216,7 @@
         
         <p class="text-xl md:text-2xl text-gray-400 max-w-2xl mb-8 pixel-font tracking-wide">
             The safe, modern, and lightweight RTP solution.<br>
-            <span class="text-white">Now with Action Bar Mode & Hex Colors (v1.1.2)</span>
+            <span class="text-white">Now with PlaceholderAPI & Rewritten Configs (v1.2.0)</span>
         </p>
 
         <!-- Compatibility Badge -->
@@ -235,7 +235,7 @@
         <div class="flex flex-col md:flex-row gap-6">
             <a href="https://modrinth.com/plugin/mirtp" target="_blank" class="mc-btn mc-btn-primary">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>
-                DOWNLOAD v1.1.2
+                DOWNLOAD v1.2.0
             </a>
             <a href="#config" class="mc-btn bg-gray-800">
                 VIEW CONFIG
@@ -315,33 +315,51 @@
 
                 <!-- Config.yml Content -->
                 <div id="code-config" class="code-snippet">
-<span class="code-key">settings:</span>
-  <span class="code-comment"># The maximum distance from 0,0 players can go (e.g., 5000 blocks)</span>
-  <span class="code-key">max-radius:</span> <span class="code-val">5000</span>
+<span class="code-comment">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#</span>
+<span class="code-comment"># / / / / / / / / / / / /  MiRTP Config  / / / / / / / / / / / / #</span>
+<span class="code-comment">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#</span>
 
-  <span class="code-comment"># The minimum distance from 0,0 (500 is by default to avoid teleporting to spawn)</span>
-  <span class="code-key">min-radius:</span> <span class="code-val">500</span>
-  <span class="code-comment"># Set to true to use the action bar for all messages. This will disable chat and title messages.</span>
+<span class="code-comment"># For support, please visit the Modrinth page.</span>
+<span class="code-comment"># You can use HEX colors like &lt;#RRGGBB&gt; in any message-related string.</span>
+
+<span class="code-comment"># General plugin settings.</span>
+<span class="code-key">general:</span>
+  <span class="code-comment"># If true, all feedback messages will be sent to the action bar.</span>
+  <span class="code-comment"># If false, messages will be sent to chat, and titles will be used for countdowns.</span>
   <span class="code-key">actionbar-mode:</span> <span class="code-val">true</span>
 
-<span class="code-key">cooldown:</span>
-  <span class="code-key">enabled:</span> <span class="code-val">true</span>
-  <span class="code-comment"># Cooldown in seconds before a player can use the RTP command again</span>
-  <span class="code-key">time:</span> <span class="code-val">30</span>
+<span class="code-comment"># All settings related to the teleportation process.</span>
+<span class="code-key">teleport:</span>
+  <span class="code-comment"># The maximum and minimum distance from 0,0 a player can be teleported.</span>
+  <span class="code-comment"># Set min-radius to a value &gt; 0 to avoid teleporting near the world spawn.</span>
+  <span class="code-key">radius:</span>
+    <span class="code-key">max:</span> <span class="code-val">5000</span>
+    <span class="code-key">min:</span> <span class="code-val">500</span>
 
-<span class="code-key">countdown:</span>
-  <span class="code-key">enabled:</span> <span class="code-val">true</span>
-  <span class="code-comment"># Countdown in seconds before the player is teleported</span>
-  <span class="code-key">time:</span> <span class="code-val">5</span>
-  <span class="code-comment"># Title message shown during the countdown. Use {time} as a placeholder.</span>
-  <span class="code-comment"># This is only used if actionbar-mode is false.</span>
-  <span class="code-key">title:</span> <span class="code-str">"&aTeleporting in &e{time}..."</span>
+  <span class="code-comment"># Cooldown settings to prevent command spam.</span>
+  <span class="code-key">cooldown:</span>
+    <span class="code-key">enabled:</span> <span class="code-val">true</span>
+    <span class="code-comment"># Time in seconds a player must wait before using /rtp again.</span>
+    <span class="code-key">time:</span> <span class="code-val">30</span>
 
+  <span class="code-comment"># Countdown settings to add a delay before teleporting.</span>
+  <span class="code-key">countdown:</span>
+    <span class="code-key">enabled:</span> <span class="code-val">true</span>
+    <span class="code-comment"># Time in seconds a player must wait before being teleported. Movement cancels it.</span>
+    <span class="code-key">time:</span> <span class="code-val">5</span>
+    <span class="code-comment"># The title message shown during countdown. Only used if actionbar-mode is false.</span>
+    <span class="code-comment"># Placeholder: {time}</span>
+    <span class="code-key">title-message:</span> <span class="code-str">"&aTeleporting in &e{time}..."</span>
+
+<span class="code-comment"># All settings for the Random Teleport GUI (/rtp).</span>
 <span class="code-key">gui:</span>
   <span class="code-key">title:</span> <span class="code-str">"&8» &0Random Teleport &8«"</span>
-  <span class="code-key">filler:</span> <span class="code-str">"GRAY_STAINED_GLASS_PANE"</span>
+  <span class="code-comment"># The material for the filler glass panes that decorate the GUI.</span>
+  <span class="code-key">filler-material:</span> <span class="code-str">"GRAY_STAINED_GLASS_PANE"</span>
   <span class="code-key">items:</span>
     <span class="code-key">overworld:</span>
+      <span class="code-comment"># The slot in the GUI where the item should appear (0-26).</span>
+      <span class="code-key">slot:</span> <span class="code-val">11</span>
       <span class="code-key">material:</span> <span class="code-str">"GRASS_BLOCK"</span>
       <span class="code-key">name:</span> <span class="code-str">"&aOverworld"</span>
       <span class="code-key">lore:</span>
@@ -351,6 +369,7 @@
         <span class="code-str">- "&8&m------------------"</span>
         <span class="code-str">- "&a► Click to Warp"</span>
     <span class="code-key">nether:</span>
+      <span class="code-key">slot:</span> <span class="code-val">13</span>
       <span class="code-key">material:</span> <span class="code-str">"NETHERRACK"</span>
       <span class="code-key">name:</span> <span class="code-str">"&cThe Nether"</span>
       <span class="code-key">lore:</span>
@@ -360,6 +379,7 @@
         <span class="code-str">- "&8&m------------------"</span>
         <span class="code-str">- "&c► Click to Warp"</span>
     <span class="code-key">end:</span>
+      <span class="code-key">slot:</span> <span class="code-val">15</span>
       <span class="code-key">material:</span> <span class="code-str">"END_STONE"</span>
       <span class="code-key">name:</span> <span class="code-str">"&dThe End"</span>
       <span class="code-key">lore:</span>
@@ -372,24 +392,29 @@
 
                 <!-- Messages.yml Content -->
                 <div id="code-messages" class="code-snippet hidden" style="display: none;">
+<span class="code-comment">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#</span>
+<span class="code-comment"># / / / / / / / / / / /  MiRTP Messages  / / / / / / / / / / / / #</span>
+<span class="code-comment">#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~#</span>
+
+<span class="code-comment"># All player-facing messages for the MiRTP plugin are configured here.</span>
 <span class="code-comment">#</span>
-<span class="code-comment"># Messages for MiRTP</span>
-<span class="code-comment"># You can use standard color codes with '&'</span>
-<span class="code-comment"># You can also use HEX colors like <#DA383C></span>
+<span class="code-comment"># You can use standard Bukkit color codes with '&'.</span>
+<span class="code-comment"># You can also use HEX colors with the format &lt;#RRGGBB&gt;.</span>
 <span class="code-comment">#</span>
 <span class="code-comment"># Placeholders:</span>
-<span class="code-comment"># {x}, {y}, {z} - coordinates</span>
-<span class="code-comment"># {world} - world name</span>
-<span class="code-comment"># {time} - remaining time</span>
+<span class="code-comment"># {x}, {y}, {z} - The coordinates of the teleport location.</span>
+<span class="code-comment"># {world} - The name of the world the player is teleporting to.</span>
+<span class="code-comment"># {time} - The remaining time for a cooldown or countdown.</span>
 <span class="code-comment">#</span>
 
-<span class="code-comment"># These messages are used when 'actionbar-mode' is FALSE in config.yml</span>
+<span class="code-comment"># General command feedback.</span>
 <span class="code-key">command:</span>
-  <span class="code-key">reload:</span> <span class="code-str">"&aMiRTP configuration reloaded."</span>
-  <span class="code-key">no-permission:</span> <span class="code-str">"&cYou do not have permission to use this command."</span>
+  <span class="code-key">reload:</span> <span class="code-str">"&a✔ MiRTP configuration has been reloaded."</span>
+  <span class="code-key">no-permission:</span> <span class="code-str">"&c✖ You do not have permission to use this command."</span>
 
-<span class="code-key">teleport:</span>
-  <span class="code-key">searching:</span> <span class="code-str">"&7Searching for safe location..."</span>
+<span class="code-comment"># Messages used when 'actionbar-mode' is FALSE in config.yml.</span>
+<span class="code-key">chat:</span>
+  <span class="code-key">searching:</span> <span class="code-str">"&7Searching for a safe location..."</span>
   <span class="code-key">success:</span>
     <span class="code-str">- " "</span>
     <span class="code-str">- "&8&m--------------------------------"</span>
@@ -399,53 +424,21 @@
     <span class="code-str">- "  &7World: &f{world}"</span>
     <span class="code-str">- "&8&m--------------------------------"</span>
     <span class="code-str">- " "</span>
-  <span class="code-key">fail:</span> <span class="code-str">"&c✘ Could not find a safe spot. Try again."</span>
-  <span class="code-key">world-not-found:</span> <span class="code-str">"&cError: World not found."</span>
-  <span class="code-key">cooldown:</span> <span class="code-str">"&cYou must wait {time} seconds before teleporting again."</span>
-  <span class="code-key">countdown-start:</span> <span class="code-str">"&aTeleportation will begin in {time} seconds. Don't move!"</span>
-  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"&cTeleportation cancelled because you moved."</span>
+  <span class="code-key">fail:</span> <span class="code-str">"&c✖ Could not find a safe spot. Please try again."</span>
+  <span class="code-key">world-not-found:</span> <span class="code-str">"&c✖ Error: The target world could not be found."</span>
+  <span class="code-key">cooldown:</span> <span class="code-str">"&c✖ You must wait {time} seconds before teleporting again."</span>
+  <span class="code-key">countdown-start:</span> <span class="code-str">"&aTeleportation will begin in {time} seconds. Do not move!"</span>
+  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"&c✖ Teleportation cancelled because you moved."</span>
 
-<span class="code-comment"># These messages are used when 'actionbar-mode' is TRUE in config.yml</span>
+<span class="code-comment"># Messages used when 'actionbar-mode' is TRUE in config.yml.</span>
 <span class="code-key">actionbar:</span>
-  <span class="code-key">searching:</span> <span class="code-str">"<#FFAA00>Searching for a safe location..."</span>
-  <span class="code-key">success:</span> <span class="code-str">"<#55FF55>Teleported to <#FFFFFF>{x}, {y}, {z}"</span>
-  <span class="code-key">fail:</span> <span class="code-str">"<#FF5555>Could not find a safe spot. Please try again."</span>
-  <span class="code-key">world-not-found:</span> <span class="code-str">"<#FF5555>Error: World not found."</span>
-  <span class="code-key">cooldown:</span> <span class="code-str">"<#FF5555>You are on cooldown for {time} seconds."</span>
-  <span class="code-key">countdown:</span> <span class="code-str">"<#FFAA00>Teleporting in <#FFFFFF>{time} <#FFAA00>seconds... Don't move!"</span>
-  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"<#FF5555>Teleport cancelled - You moved!"</span>
-</div>
-
-                <!-- Messages.yml Content -->
-                <div id="code-messages" class="code-snippet hidden" style="display: none;">
-<span class="code-comment"># Messages for MiRTP</span>
-<span class="code-comment"># You can use color codes with '&'</span>
-<span class="code-comment">#</span>
-<span class="code-comment"># Placeholder:</span>
-<span class="code-comment"># {x}, {y}, {z} - coordinates</span>
-<span class="code-comment"># {world} - world name</span>
-<span class="code-comment"># {time} - remaining time</span>
-
-<span class="code-key">command:</span>
-  <span class="code-key">reload:</span> <span class="code-str">"&aMiRTP configuration reloaded."</span>
-  <span class="code-key">no-permission:</span> <span class="code-str">"&cYou do not have permission to use this command."</span>
-
-<span class="code-key">teleport:</span>
-  <span class="code-key">searching:</span> <span class="code-str">"&7Searching for safe location..."</span>
-  <span class="code-key">success:</span>
-    <span class="code-str">- " "</span>
-    <span class="code-str">- "&8&m--------------------------------"</span>
-    <span class="code-str">- "&a&l✔ Teleport Successful"</span>
-    <span class="code-str">- " "</span>
-    <span class="code-str">- "  &7Location: &f{x}, {y}, {z}"</span>
-    <span class="code-str">- "  &7World: &f{world}"</span>
-    <span class="code-str">- "&8&m--------------------------------"</span>
-    <span class="code-str">- " "</span>
-  <span class="code-key">fail:</span> <span class="code-str">"&c✘ Could not find a safe spot. Try again."</span>
-  <span class="code-key">world-not-found:</span> <span class="code-str">"&cError: World not found."</span>
-  <span class="code-key">cooldown:</span> <span class="code-str">"&cYou must wait {time} seconds before teleporting again."</span>
-  <span class="code-key">countdown-start:</span> <span class="code-str">"&aTeleportation will begin in {time} seconds. Don't move!"</span>
-  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"&cTeleportation cancelled because you moved."</span>
+  <span class="code-key">searching:</span> <span class="code-str">"&lt;#FFAA00&gt;Searching for a safe location..."</span>
+  <span class="code-key">success:</span> <span class="code-str">"&lt;#55FF55&gt;Teleported to &lt;#FFFFFF&gt;{x}, {y}, {z}"</span>
+  <span class="code-key">fail:</span> <span class="code-str">"&lt;#FF5555&gt;Could not find a safe spot. Please try again."</span>
+  <span class="code-key">world-not-found:</span> <span class="code-str">"&lt;#FF5555&gt;Error: World not found."</span>
+  <span class="code-key">cooldown:</span> <span class="code-str">"&lt;#FF5555&gt;You are on cooldown for {time} seconds."</span>
+  <span class="code-key">countdown:</span> <span class="code-str">"&lt;#FFAA00&gt;Teleporting in &lt;#FFFFFF&gt;{time} &lt;#FFAA00&gt;seconds... Don't move!"</span>
+  <span class="code-key">countdown-cancelled:</span> <span class="code-str">"&lt;#FF5555&gt;Teleport cancelled - You moved!"</span>
 </div>
             </div>
         </div>
